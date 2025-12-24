@@ -127,7 +127,7 @@ acs-*.bib
 *.sls
 
 # uncomment this for glossaries-extra (will ignore makeindex's style files!)
-# *.ist
+ *.ist
 
 # gnuplot
 *.gnuplot
@@ -179,6 +179,9 @@ acs-*.bib
 *.maf
 *.mlf
 *.mlt
+*.maf*
+*.mlf*
+*.mlt*
 *.mtc[0-9]*
 *.slf[0-9]*
 *.slt[0-9]*

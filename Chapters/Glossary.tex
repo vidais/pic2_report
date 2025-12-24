@@ -21,6 +21,28 @@
     description={A mathematical expression}
 }
 
+\newglossaryentry{XLEN}{
+name = XLEN,
+description={Term used to describe the size of an address space in \ac{RISC-V}}
+}
+
+\newglossaryentry{FLEN}{
+name = FLEN,
+description={Term used to describe the size of the floating-point address space in \ac{RISC-V}}
+}
+
+\newglossaryentry{hart}{
+name = Hardware Thread,
+description={An hardware thread or \ac{hart} is a single hardware execution context of thread that has its set of registers and runs independently. It does not require an independent instruction fetch unit. Software sees \ac{hart} as basic units of execution.}
+}
+
+\newglossaryentry{core}{
+name = Core,
+description = {A component is termed a core if is capable of independent instruction fetch, decode and execution. It can support multiple \ac{hart} through multithreading. A \ac{RISC-V} core might have additional specialized instruction-set extensions, such as floating-point support.}
+}
+
+
+
 
 %%%%%%%%%%%%%%%%% LIST OF SYMBOLS  %%%%%%%%%%%%%
 % Here you can define the Symbols used in the document

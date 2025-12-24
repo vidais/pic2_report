@@ -1,90 +1,246 @@
-% #############################################################################
-% This is Chapter 2
-% !TEX root = ../main.tex
-% #############################################################################
-% Change the Name of the Chapter i the following line
-\fancychapter{This is the Second Chapter}
-%\cleardoublepage
-% The following line allows to ref this chapter
-\label{chap:back}
-\noindent Vivamus auctor leo vel dui. Aliquam erat volutpat. Phasellus nibh. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Cras tempor. Morbi egestas, urna non consequat tempus, nunc arcu mollis enim, eu aliquam erat nulla non nibh. Duis consectetuer malesuada velit. Nam ante nulla, interdum vel, tristique ac, condimentum non, tellus. Proin ornare feugiat nisl. Suspendisse dolor nisl, ultrices at, eleifend vel, consequat at, dolor.
-% #############################################################################
-\section{Traditional Streaming Technologies}
-Cras dictum. Maecenas ut turpis. In vitae erat ac orci dignissim eleifend. Nunc quis justo. Sed vel ipsum in purus tincidunt pharetra \cite{MacAulay:2005fk}. Sed pulvinar, felis id consectetuer malesuada, enim nisl mattis elit, a facilisis tortor nibh quis leo. Sed augue lacus, pretium vitae, molestie eget, rhoncus quis, elit \cite{Schwarz:2007lr}. Donec in augue. Fusce orci wisi, ornare id, mollis vel, lacinia vel, massa. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas..
+\fancychapter{RISC-V}\label{chap:riscv}
 
-Sed pulvinar, \enquote{felis id consectetuer} malesuada, enim nisl mattis elit, a facilisis tortor nibh quis leo \Cref{tab:streamingtech}.
+\section{RISC-V}
+
+The goals of \ac{RISC-V} are to provide a realistic but open, small yet complete \ac{ISA} that supports both 32-bit and 64-bit address spaces , highly-parallel
+multicore implementations, including heterogeneous multiprocessors. It should support the \ac{IEEE} 754 floating point standard, be fully virtualizable
+and be simple to subset for educational purposes and reduce complexity of bringing up new implementations. \cite{riscv_isa_manual_v1}
+
+\ac{RISC-V} is attractive to teaching, it was explicitly designed for academeia and research and it has a small integer base ISA that is intentionally
+simple enough to get students familiar through exercises and classroom hardware projects. Being an open standard with no licensing fees, anyone can implement 
+\ac{RISC-V} cores, distribute simulators and share hardware designs freely for teaching and research. This has led to a growing comunity of open-source 
+developers, educators and students that consistently release educational material \cite{riscv_education} to the general public.
+
+In spite of its initial focus on academia, \ac{RISC-V} is also being commercial adopted \cite{Valerio2025RiscV15} backed by many major companies such as Google, NVIDIA, IBM, Western
+Digital and Qualcomm as founding members of the \ac{RISC-V} Foundation\cite{riscv_members}. Many government sponsored projects have also become significant such 
+as \ac{DARE}\cite{DARE_RISCV_2025} supported by \ac{EJU} that aims to boost Europe in supercomputing and \ac{AI}\cite{EuroHPC_DARE_2025} by building 
+an independent \ac{HPC} supply chain or China's efforts to reduce dependence on western-controlled \acs{ISA} amid the current geopolitical climate through nationwide policies
+and guidelines \cite{EEtimes_China_RISCV_2025} lead by tech giant Alibaba's T-HEAD that developed the XuanTie serires of \ac{RISC-V} cores, and others like Huawei and Tencent, which are also Premier Members of the \ac{RISC-V} Foundation \cite{riscv_members}.\todo{Where should I add a reference to the RISC-V manual? Should I repeat such reference over and over again?}
+
+
+%A \ac{RISC-V} \ac{ISA} is defined as a base integer \ac{ISA}, which must be present in any implementation, plus optional extensions to the base \ac{ISA}. The base integer \ac{ISA}s are very similar to the early \ac{RISC} processors. This base is carefully restricted to a minimal set of instructions sufficient to provide a reasonable target for developing simple programs. It works as a "skeleton" around which customized processor \ac{ISA}s can be built. 
+
+There are currently four base \ac{ISA}s, differing in the width of the integer registers, corresponding size of the address space and number of integer registers. RV32I and RV64I provide 32-bit and 64-bit address spaces respectively. This width is reffered to as XLEN\glsadd{XLEN}. RV32E and RV64E are subset variants added to support microcontrollers with half the number of integer registers. All these \ac{ISA}s use a two's-complement representation for signed integer values.
+
+It is the belief of the authors of the \ac{RISC-V} manual that although 64-bit XLEN is required for larger systems, 32-bit XLEN will remain adequate for many embedded and client devices in the future. 32 bits are also sufficient for educational purposes.
+
+\todo{Should I explain harts in text or the glossary entry is sufficient?} 
+A \ac{RISC-V} \ac{hart}\glsadd{hart} has a single byte-addressable space of $2^{XLEN}$ bytes for all memory accesses. A word is defined as 32 bits (4 bytes). Therefore, an halfword is 16 bits (2 bytes), and a doubleword is 64 bits (8 bytes). Memory address computations ignore overflow and instead wrap around module $2^{XLEN}$. An \ac{hart} may have memory-mapped \ac{IO} devices which can be written and read directly. 
+
+\section{RISC-V F and D Extensions}
+
+The F extension adds 32 floating-point registers, f0-f31, each 32-bit wide and a floating-point control and status register. \textit{FLEN} defines the width of the \ac{FP} registers. In this extension \textit{FLEN=32}. The extension adds \ac{FP} instructions that mostly operate on values in the \ac{FP} register file. In addition, instructions to transfer values between registers and memory and to convert to and from the integer register file are also provided.
+
+The D extension widens the 32 \ac{FP} registers to 64 bits (FLEN=64)\glsadd{FLEN}. When multiple \ac{FP} precisions are supported, the values with the narrower n-bit types are represented in the lower n bits of an FLEN-bit \ac{NaN} value, in a process called \ac{NaN}-boxing. 
+
+
+\ac{FP} operations use either a static rounding mode encoded into the instruction or a dynamic rounding mode in the \textit{frm} field. There are 5 static rounding modes, which can alter the results of a program. For this project, the C++ default mode will be used i.e. round to nearest unless specified otherwise.
+
+All instructions listed bellow are defined analogously between single-precision and double-precision. 
+
+\section{F and D Exceptions}
+\ac{FP} instructions can raise exceptions which aren't defined in the base \ac{ISA} and must be defined by the extension as shown in table \cref{tab:FExcept}.
+
+\begin{table}[htb]
+	\centering
+	\normalsize
+	\caption{Exceptions thrown by the F and D extensions instructions}
+	\label{tab:FExcept}
+	\begin{tabular}{|c|c|} \hline
+		\textbf{Flag Mnemonic}& \textbf{Flag Meaning} \\ \hline \hline
+		NV & Invalid Operation \\ \hline
+		DZ & Divide by zero \\ \hline
+		OF & Overflow \\ \hline
+		UF & Underflow \\ \hline
+		NX & Inexact \\ \hline
+	\end{tabular}
+\end{table}
+
+\todo{Devo abordar exceptions? Como depois não vou tratar no Ripes, pelo menos por agora acho que pode não fazer sentido}
+
+\section{Floating-point Load and Store Instructions}
+\ac{FP} loads and stores use the same base+offset addressing mode as the integer base \ac{ISA}s. The FLW instructions loads a \ac{SP} \ac{FP} value \todo{Quão liberal posso ser com este acrónimos?} from memory into \ac{FP} register \textit{rd}. FSW stores a \ac{SP} \ac{FP} value from register \textit{rs2} to memory. \\
+
+\begin{figure}[H]
+\centering	
+\begin{bytefield}[endianness=big,bitwidth=0.03\textwidth]{32}
+\begin{leftwordgroup}{FLW/FLD}
+	\bitheader{31,20,19,15,14,12,11,7,6,0}\\
+	\bitbox{12}{\footnotesize imm[11:0]} &
+	\bitbox{5}{\footnotesize rs1} &
+	\bitbox{3}{\footnotesize width} &
+	\bitbox{5}{\footnotesize rd}  &
+	\bitbox{7}{\footnotesize opcode} &
+\end{leftwordgroup}
+\end{bytefield}\\[0.9ex]
+\todo{Perceber como centrar estes bitfields}
+
+\begin{bytefield}[endianness=big,bitwidth=0.03\textwidth]{32}
+\begin{leftwordgroup}{FSW/FSD}
+	\bitheader{31,25,24,20,19,15,14,12,11,7,6,0}\\
+	\bitbox{7}{\footnotesize imm[11:5]} &
+	\bitbox{5}{\footnotesize src} &
+	\bitbox{5}{\footnotesize base} &
+	\bitbox{3}{\footnotesize width}  &
+	\bitbox{5}{\footnotesize imm[4:0]} &
+	\bitbox{7}{\footnotesize opcode} &
+\end{leftwordgroup}
+\end{bytefield}
+\end{figure}
+
+\section{Floating-point Computational Instructions}
+
+Floating-point arithmetic instructions with one or two source operands use the R-type format with the OP-FP major opcode. The functionality of these instructions is defined in \cref{tab:comp_instr}.\\
+
+\begin{bytefield}[endianness=big,bitwidth=0.03\textwidth]{32}
+	\bitheader{31,27,26,25,24,20,19,15,14,12,11,7,6,0}\\
+	\bitbox{5}{funct5} &
+	\bitbox{2}{fmt} &
+	\bitbox{5}{rs2} &
+	\bitbox{5}{rs1} &
+	\bitbox{3}{rm} &
+	\bitbox{5}{rd} &
+	\bitbox{7}{opcode}
+\end{bytefield}\\
 
 \begin{table}[htb]
 \centering
 \normalsize
-{\footnotesize
-    \caption{Streaming Technologies Comparison}
-    \label{tab:streamingtech}
-    \begin{tabular}{ | c | c | c | c |}
-    \hline
-    & Dynamic & Smooth & HLS\\
-    & Streaming & Streaming & \\ \hline \hline
+\caption{Floating-point computational instructions}
+\label{tab:comp_instr}
+	\begin{tabular}{|c|c|c|c|} \hline
+	\textbf{Instruction} & \textbf{Mnemonic (funct5)} & \textbf{Expression} \\ \hline \hline
+	\ac{FP} Addition & FADD& $rd = rs1 + rs2$ \\ \hline
+	\ac{FP} Subtraction & FSUB & $rd = rs2 - rs1$ \\ \hline
+	\ac{FP} Multiplication & FMUL & $rd = rs1 * rs2$ \\ \hline
+	\ac{FP} Division & FDIV & $rd = rs1 / rs2$ \\ \hline
+	\ac{FP} Square Root & FSQRT & $rd = rs1^2$ \\ \hline
+	\end{tabular}
+\end{table}
 
-    Streaming Protocol & RTMP & HTTP & HTTP \\
-    %\textbf{Protocol} & & & \\ 
-    \hline
-    
-    Video Codec & H.264, VP6 & H.264 & H.264 \\ 
-    %\textbf{Codec} & &  & \\ 
-    \hline
-    
-    Audio Codec & AAC, MP3 & WMA, AAC & AAC, MP3  \\
-    %\textbf{Codec} & & & \\ 
-    \hline
-    
-    Container Format & MP4, FLV, & MP4 & MPEG2-TS \\
-    %\textbf{Format} & F4V & & \\ 
-    \hline
-    
-     iOS & NO & YES & YES \\ \hline
-     
-    Android & NO & YES & YES \\ \hline
-    
-    \end{tabular}
-    }
-\end{table} 
-
-Suspendisse vestibulum dignissim quam. Integer vel augue. Phasellus nulla purus, interdum ac, venenatis non, varius rutrum, leo. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas \cite{RFC-VP8}. Duis a eros. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos. Fusce magna mi, porttitor quis, convallis eget, sodales ac, urna \cite{Chiang:2011fk}. \textcolor{violet}{\Cref{tab:spreadtb} illustrates the use of a Spreadsheet-like table producing calculations by columns and by lines (observe the code).} 
+The precision of all \ac{FP} instructions is encoded in the \textit{fmt} field according to \cref{tab:fmt}:\\
 
 \begin{table}[htb]
 \centering
-    \caption{A nice Spreadsheet using package ``spreadtab''. Notice the calculations.}
-    \label{tab:spreadtb}
-\begin{spreadtab}{{tabular}{rr|r}} 
-22       & 54       & a1+b1 \\
-43       & 65       & a2+b2 \\ 
-49       & 37       & a3+b3 \\
-\hline
-a1+a2+a3 & b1+b2+b3 & a4+b4
-\end{spreadtab}
-\end{table} 
-% #############################################################################
-\section{Cras lobortis tempor velit}
-Nunc tincidunt convallis tortor. Duis eros mi, dictum vel, fringilla sit amet, fermentum id, sem. Phasellus nunc enim, faucibus ut, laoreet in, consequat id, metus. Vivamus dignissim \cite{Moscoso:2011fk}. \textcolor{violet}{\Cref{tab:comp_arch} is automatically compressed to fit text width. You can use \url{https://www.tablesgenerator.com} to produce these tables, and then copy the \LaTeX\space code generated to paste in the document.}
-
-
-\begin{table}[h]
-\centering
-\caption{Comparison between today's and target Architectures of Telcos}
-\label{tab:comp_arch}
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{|
->{\columncolor[HTML]{ECF4FF}}l |l|
->{\columncolor[HTML]{E2FFC9}}l |l|}
-\hline
-\multicolumn{2}{|c|}{\cellcolor[HTML]{ECF4FF}Today}                                                                                                             & \multicolumn{2}{c|}{\cellcolor[HTML]{E2FFC9}Target}                                                                                  \\ \hline
-Rigid     & \begin{tabular}[c]{@{}l@{}}Each evolutionary requirement involves \\ development of multiple components, \\ interfaces, platforms,etc.\end{tabular} & Flexible       & \begin{tabular}[c]{@{}l@{}}It is possible to modify or add new\\ functionalities rapidly.\end{tabular}              \\ \hline
-Slow      & \begin{tabular}[c]{@{}l@{}}Development of a new application takes \\ months or years.\end{tabular}                                                  & Fast           & \begin{tabular}[c]{@{}l@{}}Development of a new application takes \\ weeks instead of months or years.\end{tabular} \\ \hline
-Closed    & \begin{tabular}[c]{@{}l@{}}Limited integration with external\\ environments.\end{tabular}                                                           & Open           & \begin{tabular}[c]{@{}l@{}}It is simple to integrate internal,\\ applications with external entities.\end{tabular}  \\ \hline
-Complex   & \begin{tabular}[c]{@{}l@{}}Heterogeneous technologies, obsolescence, \\ lack,of standards, high redundancy.\end{tabular}                            & Standardised   & Use of homogeneous architectural models.                                                                            \\ \hline
-Expensive & \begin{tabular}[c]{@{}l@{}}High Capex (for new service development) \\ and,high,Opex (to ensure running of IT).\end{tabular}                        & Cost-Effective & Capex and Opex are optimised.                                                                                       \\ \hline
-\end{tabular}
-}
+\normalsize
+\caption{Format field encoding}
+\label{tab:fmt}
+	\begin{tabular}{|c|c|c|} \hline
+	\textbf{fmt field}& \textbf{Mnemonic}&\textbf{Meaning} \\ \hline \hline
+	00 & S & 32-bit single-precision \\ \hline
+	01 & D & 64-bit double-precision \\ \hline
+	10 & H & 16-bit half-precision \\ \hline
+	11 & Q & 128-bit quad-precision \\ \hline
+	\end{tabular}
 \end{table}
 
-Cras lobortis tempor velit. Phasellus nec diam ac nisl lacinia tristique. Nullam nec metus id mi dictum dignissim. Nullam quis wisi non sem lobortis condimentum. Phasellus pulvinar, nulla non aliquam eleifend, tortor wisi scelerisque felis, in sollicitudin arcu ante lacinia leo.
+In addition to \cref{tab:comp_instr}, the extension also adds minimum (FMIN) and maxmimum (FMAX) instructions. These write the smaller or larger, respectively, of \textit{rs1} and \textit{rs2}. These instructions implement \ac{IEEE} 754-201x rather than \ac{IEEE} 754-2008, differing only in how they handle \ac{NaN} signals. \cite{ieee754-2019}
+
+\todo{Devo abordar NaN? COm que detalhe?}
+
+\section{Floating-point Fused Instructions}
+
+\ac{FP} fused multiply-add instructions require a new standard instruction format in order to specify three source registers plus a destination register. \textbf{R4-type} is only used by these instructions. These instructions use an opcode per instruction rather than a common one due to the space occupied by the extra source register. These are defined in \cref{tab:fused_instr}\\
+
+\begin{bytefield}[endianness=big,bitwidth=0.03\textwidth]{32}
+\bitheader{31,27,26,25,24,20,16,14,14,12,11,7,6,0}\\
+\bitbox{5}{rs3} &
+\bitbox{2}{fmt} &
+\bitbox{5}{rs2} & 
+\bitbox{5}{rs1} &
+\bitbox{3}{rm} &
+\bitbox{5}{rd} &
+\bitbox{7}{opcode} 
+\end{bytefield}
+
+\begin{table}[htb]
+\centering
+\normalsize
+\caption{Floating-point fused instructions}
+\label{tab:fused_instr}
+	\begin{tabular}{|c|c|c|} \hline
+	\textbf{Instruction} & \textbf{Mnemonic} & \textbf{Expression} \\ \hline \hline
+	Fused Multiply-Addition & FMADD & $(rs1 * rs2) + rs3$ \\ \hline
+	Fused Multiply-Subtration & FMSUB & $(rs1 * rs2) - rs3$ \\ \hline
+	Fused Negated Multiply-Addition & FNMADD & $-(rs1 * rs2) - rs3$ \\ \hline
+	Fused Negated Multiply-Subtraction & FNMSUB & $-(rs1 * rs2) + rs3$ \\ \hline
+	\end{tabular}
+\end{table}
+
+\section{Floating-point Conversion and Move Instructions}
+Floating-point to integer and integer to floating-point conversion instructions are encoded in the OP-FP major opcode space. These are also encoded in R-type.
+
+\begin{table}[htb]
+\centering
+\normalsize
+\caption{Floating-point conversion and move instructions}
+\label{tab:mov_instr}
+	\begin{tabular}{|c|c|c|} \hline
+	\textbf{Instruction} & \textbf{Mnemonic} & \textbf{Expression} \\ \hline \hline
+	Unsigned \ac{FP} to integer & FCVT.{W/L}.S & $rd = float(rs1)$ \\ \hline
+	Signed \ac{FP} to integer & FCVT.S.{W/L} & $rd = float(rs1)$ \\ \hline
+	\end{tabular}
+\end{table}
+
+For XLEN\glsadd{XLEN} larger than 32 bits, the 32-bit result should be sign-extended to the destination register width. If the rounded result is not representable in the destination format, it is clipped to the nearest value and the invalid flag is set. A floating-point positive zero can be set using $FCVT.S.W rd,x0$ which will never throw any exception flags. Conversion instruction can also throw the inexact exception if the rounded value doesn't match the operand value. 
+
+\section{Floating Point Sign-Injection Instructions}
+\ac{FP} sign-injection instructions produce a result that takes all bits except the sign bit from rs1. The sign bit is instead taken from rs2, modified as required by the instruction and then inserted into the result. The modification to the sign bit is defined in \cref{tab:sgn_instr}
+
+\begin{table}[htb]
+\centering
+\normalsize
+\caption{Floating-point sign injection instructions}
+\label{tab:sgn_instr}
+	\begin{tabular}{|c|c|c|} \hline
+	\textbf{Instruction} & \textbf{Mnemonic} & \textbf{Sign bit Modification} \\ \hline \hline
+	Sign-injection & FSGNJ &  rd sign bit = rs2 sign bit \\ \hline
+	Negated sign-injection & FSGNJN & rd sign bit = - rs2 sign bit \\ \hline
+	XOR'ed sign-injection & FSGNJX & rd sign bit = XOR(rs1 sign bit, rs2 sign bit) \\ \hline
+	\end{tabular}
+\end{table}
+
+\section{Floating-Point Compare Instructions}
+
+Floating-point compare instructions perform the specified comparison between floating-point registers, writing 1 to the integer register rd if the condition holds and 0 otherwise. Available comparisons are defined in \cref{tab:compare_instr}. 
+
+As stated in \ac{IEEE} 754-2008, if either input is \ac{NaN} the invalid operation exception is thro\cite{ieee754-2008} The result is always zero if either operand is \ac{NaN}.
+
+\begin{table}[htb]
+\centering
+\normalsize
+\caption{Floating-point comparison instructions}
+\label{tab:compare_instr}
+	\begin{tabular}{|c|c|c|} \hline
+	\textbf{Instruction} & \textbf{Mnemonic} & \textbf{Sign bit Modification} \\ \hline \hline
+	Lesser or Equal than & FLE & $rs1\le rs2$ \\ \hline
+	Lesser than & FLT & $rs1<rs2$ \\ \hline
+	Equal to & FEQ & $rs1=rs2$ \\ \hline
+	\end{tabular}
+\end{table}
+
+There's no defined greater or greater than instructions, contrary to the base ISA. These can be synthesized from the ones above by switching the operands, with no performance penalty.
+
+\section{Floating-point Classify Instruction}
+
+The classify instruction examines the value in \ac{FP} register rs1 and writes to integer register rd a 10-bit mask that indicates the class of the floating-point number. The format of such mask is defined in \cref{tab:class_instr}. One of the 10 bits is set if the property is true and clear otherwise. All other bits is rd are cleared.
+
+\begin{table}[htb]
+\centering
+\normalsize
+\caption{Floating-point Classify instruction result format}
+\label{tab:class_instr}
+	\begin{tabular}{|c|c|c|} \hline
+	\textbf{rd bit} & \textbf{Meaning} \\ \hline \hline
+	0 & rs1 is $-\infty$ \\ \hline
+	1 & rs1 is a negative normal number \\ \hline
+	2 & rs1 is a negative subnormal number \\ \hline
+	3 & rs1 is $-0$ \\ \hline
+	4 & rs1 is $+0$ \\ \hline
+	5 & rs1 is a positive subnormal number \\ \hline
+	6 & rs1 is a positive normal number \\ \hline
+	7 & rs1 is $+\infty$ \\ \hline
+	8 & rs1 is a signaling \ac{NaN} \\ \hline
+	9 & rs1 is a quiet \ac{NaN} \\ \hline
+	\end{tabular}
+\end{table}

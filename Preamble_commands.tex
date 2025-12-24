@@ -45,7 +45,9 @@
 % -----------------------------------------------------------------------------
 % Tikz  for creating graphics programmatically.
 \usepackage{tikz}
-\usetikzlibrary{shapes.geometric, arrows, positioning}
+\usetikzlibrary{shapes.geometric, arrows, positioning,calc}
+%Bytefield helps creating instruction visualizations
+\usepackage{bytefield}
 % -----------------------------------------------------------------------------
 % PACKAGES array, booktabs, multirow, colortbl, spreadtab:
 % -----------------------------------------------------------------------------
@@ -102,9 +104,9 @@
 % -----------------------------------------------------------------------------
 % Create TODO Notes in text
 % The notes can be made invisible by just using the 'disable' option:
-\usepackage[textwidth=2cm, textsize=small]{todonotes}
-%\usepackage[textwidth=2cm, textsize=small, disable]{todonotes}
-\setlength{\marginparwidth}{2cm}
+%\usepackage[textwidth=1.85cm, textsize=small]{todonotes}
+\usepackage[textwidth=2cm, textsize=small, disable]{todonotes}
+\setlength{\marginparwidth}{1.9cm}
 % -----------------------------------------------------------------------------
 % PACKAGE changes
 % -----------------------------------------------------------------------------
@@ -342,7 +344,7 @@
 \usepackage{shellesc}
 \usepackage{siunitx}
 \usepackage[lang-warn=false]{datatool-base}
-\usepackage[symbols,nopostdot]{glossaries-extra}
+\usepackage[automake,symbols,nopostdot]{glossaries-extra}
 \usepackage{glossary-longragged}
 % Special style to print trailing dots before locations list
 \makeatletter
